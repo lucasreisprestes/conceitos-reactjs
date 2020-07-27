@@ -5,26 +5,22 @@ import api from "./services/api";
 
 function App() {
 
-  const [ repositorys, setRepositorys ] = useState([]);
-  const [ mounted, setMounted ] = useState(0);
-  
+  const [repositorys, setRepositorys] = useState([]);
+    
   useEffect( ( ) => { 
 
-    const getRepositories = async () => {
-      const response = await api.get('/repositories');
-      setRepositorys(response.data)
-    }
-    getRepositories();
-           
-
-  },[ mounted ]);
+    api.get('repositories').then(response => {
+      setRepositorys(response.data);
+    });
+        
+  },[]);
 
   async function handleAddRepository() {
     
-    const response = await api.post('./repositories',{
-      "title":`Novo repositorio ${Date.now()} `,
-      "url":"https://github.com/wendelrios/bootcamp",
-      "techs": [
+    const response = await api.post('/repositories',{
+      title:`Novo repositorio ${Date.now()} `,
+      url:"https://github.com/wendelrios/bootcamp",
+      techs: [
         "Node JS",
         "Express",
         "React"
@@ -32,14 +28,20 @@ function App() {
     });
 
     setRepositorys([...repositorys, response.data]);
-    setMounted(mounted+1);
+  
   }
 
   async function handleRemoveRepository(id) {
-    api.delete(`./repositories/${id}`, {
-      data:{id}
-    });
-    setMounted(mounted+1);
+    
+    const response = await api.delete(`/repositories/${id}`);
+
+    if(response.status === 204){
+      
+      const repositoryList = repositorys.filter(repository => repository.id !== id);
+      
+      setRepositorys(repositoryList);
+    }
+
   }
 
   return (
